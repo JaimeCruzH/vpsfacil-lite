@@ -69,7 +69,6 @@ ExecStart=/usr/bin/kopia server start \\
     --address=127.0.0.1:${PORT_KOPIA} \\
     --server-username=${ADMIN_USER} \\
     --server-password=${ADMIN_PASSWORD} \\
-    --server-tls-generate-cert=false \\
     --no-grpc
 Restart=on-failure
 RestartSec=5

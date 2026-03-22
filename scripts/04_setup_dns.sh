@@ -27,9 +27,23 @@ if [[ -z "${CF_API_TOKEN:-}" ]]; then
 fi
 
 if [[ -z "${TAILSCALE_IP:-}" ]]; then
-    log_error "TAILSCALE_IP no está configurada."
-    log_error "El paso de Tailscale (paso 4) debe completarse primero."
-    exit 1
+    log_info "TAILSCALE_IP no está en la configuración. Obteniendo desde Tailscale..."
+    TAILSCALE_IP=$(tailscale ip -4 2>/dev/null || true)
+    if [[ -z "${TAILSCALE_IP:-}" ]]; then
+        log_error "No se pudo obtener la IP de Tailscale."
+        log_error "El paso de Tailscale (paso 4) debe completarse primero."
+        exit 1
+    fi
+    # Guardar en todos los archivos de configuración existentes
+    for _conf in "/root/setup.conf" "${ADMIN_HOME}/setup.conf" "/tmp/vpsfacil_setup.conf"; do
+        [[ -f "$_conf" ]] || continue
+        if grep -q "^TAILSCALE_IP=" "$_conf"; then
+            sed -i "s|^TAILSCALE_IP=.*|TAILSCALE_IP=\"${TAILSCALE_IP}\"|" "$_conf"
+        else
+            echo "TAILSCALE_IP=\"${TAILSCALE_IP}\"" >> "$_conf"
+        fi
+    done
+    log_success "TAILSCALE_IP recuperada: ${TAILSCALE_IP}"
 fi
 
 log_success "CF_API_TOKEN: configurado ✓"

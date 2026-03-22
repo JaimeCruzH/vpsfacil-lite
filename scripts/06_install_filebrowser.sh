@@ -63,7 +63,7 @@ mkdir -p "${APP_DIR}"
 chown "${ADMIN_USER}:${ADMIN_USER}" "${APP_DIR}"
 
 if [[ -f "${DB_FILE}" ]]; then
-    log_info "Base de datos existente detectada. Omitiendo inicialización."
+    log_info "Base de datos existente detectada. Omitiendo inicialización y creación de usuario."
 else
     filebrowser config init --database "${DB_FILE}"
     filebrowser config set \
@@ -72,13 +72,7 @@ else
         --port "${PORT_FILEBROWSER}" \
         --root "${ADMIN_HOME}"
     log_success "Base de datos inicializada ✓"
-fi
 
-# Crear usuario admin (idempotente: si ya existe, actualizar contraseña)
-if filebrowser users ls --database "${DB_FILE}" 2>/dev/null | grep -q "^${ADMIN_USER}$"; then
-    filebrowser users update "${ADMIN_USER}" --password "${ADMIN_PASSWORD}" --database "${DB_FILE}"
-    log_info "Usuario '${ADMIN_USER}' actualizado en File Browser."
-else
     filebrowser users add "${ADMIN_USER}" "${ADMIN_PASSWORD}" \
         --perm.admin \
         --database "${DB_FILE}"

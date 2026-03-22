@@ -51,14 +51,22 @@ STEPS=(
     "09_finalize.sh"
 )
 
-if [[ -f "${STATE_FILE}" ]] && [[ -s "${STATE_FILE}" ]]; then
+if [[ -f "/root/setup.conf" ]]; then
     # ── Modo RESUME ─────────────────────────────────────────
+    # setup.conf existe → el usuario ya ingresó sus datos en una sesión
+    # anterior. Cargamos la configuración y mostramos el estado.
     echo -e "${COLOR_BOLD_YELLOW}╔══════════════════════════════════════════════════════════════╗${COLOR_RESET}"
     echo -e "${COLOR_BOLD_YELLOW}║         ↩  Retomando instalación anterior                    ║${COLOR_RESET}"
     echo -e "${COLOR_BOLD_YELLOW}╚══════════════════════════════════════════════════════════════╝${COLOR_RESET}"
     echo ""
-    log_info "Se detectó una instalación previa. Cargando configuración guardada..."
+    log_info "Configuración guardada encontrada. No es necesario ingresar los datos de nuevo."
     source_config
+    echo ""
+    log_info "Configuración cargada:"
+    echo -e "   ${COLOR_BOLD_WHITE}Dominio:${COLOR_RESET}       ${COLOR_CYAN}${DOMAIN}${COLOR_RESET}"
+    echo -e "   ${COLOR_BOLD_WHITE}Usuario admin:${COLOR_RESET} ${COLOR_CYAN}${ADMIN_USER}${COLOR_RESET}"
+    echo -e "   ${COLOR_BOLD_WHITE}Zona horaria:${COLOR_RESET}  ${COLOR_CYAN}${TIMEZONE}${COLOR_RESET}"
+    echo -e "   ${COLOR_BOLD_WHITE}CF API Token:${COLOR_RESET}  ${COLOR_CYAN}(guardado ✓)${COLOR_RESET}"
     echo ""
     log_info "Estado de los pasos:"
     for script in "${STEPS[@]}"; do
@@ -72,7 +80,7 @@ if [[ -f "${STATE_FILE}" ]] && [[ -s "${STATE_FILE}" ]]; then
     echo ""
     log_info "Para empezar de cero: rm ${STATE_FILE} /root/setup.conf && bash setup.sh"
     echo ""
-    wait_for_user "Presiona Enter para continuar desde el último punto guardado..."
+    wait_for_user "Presiona Enter para continuar..."
 else
     # ── Instalación nueva ────────────────────────────────────
     ask_initial_config

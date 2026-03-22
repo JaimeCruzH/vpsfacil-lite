@@ -43,13 +43,40 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y -qq kopia
 log_success "Kopia instalado ✓"
 kopia --version
 
-# ── Crear directorio de trabajo ────────────────────────────
+# ── Crear directorios de trabajo ───────────────────────────
 log_step "Configurando directorios de Kopia"
 
-mkdir -p "${APP_DIR}"
-mkdir -p "${APPS_DIR}/backups"
-chown -R "${ADMIN_USER}:${ADMIN_USER}" "${APP_DIR}"
-chown -R "${ADMIN_USER}:${ADMIN_USER}" "${APPS_DIR}/backups"
+KOPIA_CONFIG="${APP_DIR}/repository.config"
+KOPIA_CACHE="${APP_DIR}/cache"
+KOPIA_LOG="${LOG_DIR}/kopia"
+BACKUP_REPO="${APPS_DIR}/backups"
+
+mkdir -p "${APP_DIR}" "${KOPIA_CACHE}" "${KOPIA_LOG}" "${BACKUP_REPO}"
+chown -R "${ADMIN_USER}:${ADMIN_USER}" "${APP_DIR}" "${BACKUP_REPO}"
+
+# ── Inicializar repositorio local (requerido por Kopia 0.22+) ─────
+log_step "Inicializando repositorio local de Kopia"
+
+log_info "La contraseña de cifrado del repositorio será la misma que la contraseña admin."
+log_info "Guárdala bien — sin ella no podrás recuperar los backups."
+
+if [[ -f "${KOPIA_CONFIG}" ]]; then
+    log_info "Repositorio ya configurado. Omitiendo inicialización."
+else
+    log_process "Creando repositorio filesystem en ${BACKUP_REPO}..."
+    sudo -u "${ADMIN_USER}" \
+        KOPIA_PASSWORD="${ADMIN_PASSWORD}" \
+        kopia repository create filesystem \
+            --path="${BACKUP_REPO}" \
+            --config-file="${KOPIA_CONFIG}" \
+            --cache-directory="${KOPIA_CACHE}" \
+            --log-dir="${KOPIA_LOG}" \
+            --override-hostname="$(hostname)" \
+            --override-username="${ADMIN_USER}"
+    log_success "Repositorio local creado en ${BACKUP_REPO} ✓"
+fi
+
+chown -R "${ADMIN_USER}:${ADMIN_USER}" "${APP_DIR}" "${BACKUP_REPO}"
 
 # ── Crear servicio systemd ─────────────────────────────────
 log_step "Creando servicio systemd para Kopia Server"
@@ -69,6 +96,10 @@ ExecStart=/usr/bin/kopia server start \\
     --address=127.0.0.1:${PORT_KOPIA} \\
     --server-username=${ADMIN_USER} \\
     --server-password=${ADMIN_PASSWORD} \\
+    --config-file=${KOPIA_CONFIG} \\
+    --cache-directory=${KOPIA_CACHE} \\
+    --log-dir=${KOPIA_LOG} \\
+    --insecure \\
     --no-grpc
 Restart=on-failure
 RestartSec=5

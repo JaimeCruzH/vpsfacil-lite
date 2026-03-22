@@ -241,15 +241,11 @@ _derive_config_vars() {
 # FUNCIÓN: guardar configuración en archivo
 # ============================================================
 save_config() {
-    local config_file
+    # Siempre guardar en /root/setup.conf para que el resume funcione
+    # incluso antes de que exista el usuario admin
+    local root_config="/root/setup.conf"
 
-    if [[ -d "/home/${ADMIN_USER}" ]]; then
-        config_file="/home/${ADMIN_USER}/setup.conf"
-    else
-        config_file="/tmp/vpsfacil_setup.conf"
-    fi
-
-    cat > "$config_file" << EOF
+    cat > "$root_config" << EOF
 # ============================================================
 # VPSfacil-lite - Configuración de instalación
 # Generado automáticamente el $(date '+%Y-%m-%d %H:%M:%S')
@@ -263,8 +259,16 @@ CF_API_TOKEN="${CF_API_TOKEN}"
 INSTALLATION_DATE="$(date '+%Y-%m-%d')"
 EOF
 
-    chmod 600 "$config_file"
-    log_success "Configuración guardada en: ${config_file}"
+    chmod 600 "$root_config"
+    log_success "Configuración guardada en: ${root_config}"
+
+    # También guardar en el home del usuario si ya existe
+    if [[ -d "/home/${ADMIN_USER}" ]]; then
+        local user_config="/home/${ADMIN_USER}/setup.conf"
+        cp "$root_config" "$user_config"
+        chown "${ADMIN_USER}:${ADMIN_USER}" "$user_config"
+        chmod 600 "$user_config"
+    fi
 }
 
 # ============================================================
@@ -289,3 +293,6 @@ readonly NGINX_ENABLED_DIR="/etc/nginx/sites-enabled"
 # Timeouts (en segundos)
 readonly TIMEOUT_SERVICE_START=30
 readonly TIMEOUT_USER_INPUT=300
+
+# Archivo de estado de instalación (checkpoint/resume)
+readonly STATE_FILE="/root/.vpsfacil_install_state"

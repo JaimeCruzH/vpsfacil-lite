@@ -37,10 +37,7 @@ echo -e "${COLOR_BOLD_BLUE}║${COLOR_RESET}                                    
 echo -e "${COLOR_BOLD_BLUE}╚══════════════════════════════════════════════════════════════╝${COLOR_RESET}"
 echo ""
 
-# ── Configuración inicial ──────────────────────────────────
-ask_initial_config
-
-# ── Ejecutar pasos en orden ────────────────────────────────
+# ── Configuración inicial / Modo resume ───────────────────
 STEPS=(
     "00_precheck.sh"
     "01_create_user.sh"
@@ -54,13 +51,50 @@ STEPS=(
     "09_finalize.sh"
 )
 
+if [[ -f "${STATE_FILE}" ]] && [[ -s "${STATE_FILE}" ]]; then
+    # ── Modo RESUME ─────────────────────────────────────────
+    echo -e "${COLOR_BOLD_YELLOW}╔══════════════════════════════════════════════════════════════╗${COLOR_RESET}"
+    echo -e "${COLOR_BOLD_YELLOW}║         ↩  Retomando instalación anterior                    ║${COLOR_RESET}"
+    echo -e "${COLOR_BOLD_YELLOW}╚══════════════════════════════════════════════════════════════╝${COLOR_RESET}"
+    echo ""
+    log_info "Se detectó una instalación previa. Cargando configuración guardada..."
+    source_config
+    echo ""
+    log_info "Estado de los pasos:"
+    for script in "${STEPS[@]}"; do
+        step_name="${script%.sh}"
+        if step_is_done "${step_name}"; then
+            echo -e "  ${COLOR_BOLD_GREEN}✓${COLOR_RESET}  ${step_name}"
+        else
+            echo -e "  ${COLOR_YELLOW}·${COLOR_RESET}  ${step_name} ${COLOR_YELLOW}(pendiente)${COLOR_RESET}"
+        fi
+    done
+    echo ""
+    log_info "Para empezar de cero: rm ${STATE_FILE} /root/setup.conf && bash setup.sh"
+    echo ""
+    wait_for_user "Presiona Enter para continuar desde el último punto guardado..."
+else
+    # ── Instalación nueva ────────────────────────────────────
+    ask_initial_config
+fi
+
+# ── Ejecutar pasos en orden (con checkpoint) ───────────────
 for script in "${STEPS[@]}"; do
+    step_name="${script%.sh}"
     script_path="${SETUP_DIR}/scripts/${script}"
+
+    if step_is_done "${step_name}"; then
+        echo -e "  ${COLOR_BOLD_GREEN}✓${COLOR_RESET}  ${COLOR_WHITE}${step_name}${COLOR_RESET} — ya completado, omitiendo"
+        continue
+    fi
+
     if [[ ! -f "$script_path" ]]; then
         log_error "Script no encontrado: ${script_path}"
         exit 1
     fi
+
     bash "$script_path"
+    step_mark_done "${step_name}"
 done
 
 # ── Resumen final ──────────────────────────────────────────

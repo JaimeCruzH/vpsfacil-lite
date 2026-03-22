@@ -397,3 +397,30 @@ wait_for_dpkg() {
         waited=$((waited + 2))
     done
 }
+
+# ============================================================
+# FUNCIONES DE CHECKPOINT — Registro de avance de instalación
+# Permiten retomar desde el último paso completado si el
+# script se interrumpe por cualquier motivo.
+# ============================================================
+
+# step_is_done — Verificar si un paso ya fue completado
+# Uso: step_is_done "00_precheck"
+step_is_done() {
+    local step_name="$1"
+    [[ -f "${STATE_FILE}" ]] && grep -qx "${step_name}" "${STATE_FILE}"
+}
+
+# step_mark_done — Registrar un paso como completado
+# Uso: step_mark_done "00_precheck"
+step_mark_done() {
+    local step_name="$1"
+    echo "${step_name}" >> "${STATE_FILE}"
+}
+
+# step_reset — Borrar el registro de avance para empezar de cero
+# Uso: step_reset
+step_reset() {
+    rm -f "${STATE_FILE}"
+    log_info "Registro de avance eliminado. La próxima ejecución empezará desde el inicio."
+}

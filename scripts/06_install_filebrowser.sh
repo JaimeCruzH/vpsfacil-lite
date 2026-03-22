@@ -36,7 +36,8 @@ esac
 
 log_process "Obteniendo URL del release más reciente (arch: ${ARCH})..."
 RELEASE_URL=$(curl -sf "https://api.github.com/repos/filebrowser/filebrowser/releases/latest" \
-    | jq -r ".assets[] | select(.name | test(\"linux-${ARCH}\\.tar\\.gz\")) | .browser_download_url" \
+    | jq -r --arg arch "linux-${ARCH}" \
+        '.assets[] | select((.name | contains($arch)) and (.name | endswith(".tar.gz"))) | .browser_download_url' \
     | head -1)
 
 if [[ -z "$RELEASE_URL" ]]; then

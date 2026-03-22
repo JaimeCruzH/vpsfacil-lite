@@ -1,9 +1,8 @@
 #!/bin/bash
 # ============================================================
-# Paso 9 de 10 — Instalar Beszel Hub + Agent
+# Paso 9 de 10 — Instalar Beszel Hub
 # VPSfacil-lite - Instalación Nativa sin Docker
-# Beszel es un sistema de monitoreo de servidores.
-# Hub: interfaz web central. Agent: monitor en cada servidor.
+# Beszel Hub: interfaz web de monitoreo de servidores.
 # ============================================================
 set -euo pipefail
 
@@ -15,7 +14,7 @@ source "${SCRIPT_DIR}/../lib/progress.sh"
 
 source_config
 print_header "Paso 9 de 10 — Beszel Hub"
-show_progress 9 "Instalar Beszel Hub y Agent"
+show_progress 9 "Instalar Beszel Hub"
 check_root
 
 APP_DIR="${APPS_DIR}/beszel"
@@ -45,7 +44,8 @@ if [[ -f "${BESZEL_HUB_BIN}" ]]; then
 fi
 
 HUB_URL=$(curl -sf "https://api.github.com/repos/henrygd/beszel/releases/latest" \
-    | jq -r ".assets[] | select(.name | test(\"beszel_hub_linux_${ARCH}\\.tar\\.gz\")) | .browser_download_url" \
+    | jq -r --arg arch "${ARCH}" \
+        '.assets[] | select((.name | contains("beszel_hub_linux_" + $arch)) and (.name | endswith(".tar.gz"))) | .browser_download_url' \
     | head -1)
 
 if [[ -z "$HUB_URL" ]]; then
@@ -59,26 +59,6 @@ TMPDIR_BZ=$(mktemp -d)
 curl -fsSL "${HUB_URL}" -o "${TMPDIR_BZ}/beszel_hub.tar.gz"
 tar -xzf "${TMPDIR_BZ}/beszel_hub.tar.gz" -C "${TMPDIR_BZ}"
 install -m 755 "${TMPDIR_BZ}/beszel_hub" "${BESZEL_HUB_BIN}"
-
-# ── Descargar Beszel Agent ─────────────────────────────────
-log_step "Descargando Beszel Agent"
-
-BESZEL_AGENT_BIN="${BIN_DIR}/beszel_agent"
-
-AGENT_URL=$(curl -sf "https://api.github.com/repos/henrygd/beszel/releases/latest" \
-    | jq -r ".assets[] | select(.name | test(\"beszel_agent_linux_${ARCH}\\.tar\\.gz\")) | .browser_download_url" \
-    | head -1)
-
-if [[ -z "$AGENT_URL" ]]; then
-    log_warning "No se encontró el Agent. Solo se instalará el Hub."
-else
-    log_process "Descargando Agent: ${AGENT_URL}"
-    curl -fsSL "${AGENT_URL}" -o "${TMPDIR_BZ}/beszel_agent.tar.gz"
-    tar -xzf "${TMPDIR_BZ}/beszel_agent.tar.gz" -C "${TMPDIR_BZ}"
-    install -m 755 "${TMPDIR_BZ}/beszel_agent" "${BESZEL_AGENT_BIN}"
-    log_success "Beszel Agent instalado ✓"
-fi
-
 rm -rf "${TMPDIR_BZ}"
 log_success "Beszel Hub instalado en ${BESZEL_HUB_BIN} ✓"
 
@@ -127,7 +107,6 @@ sleep 3
 
 ADMIN_EMAIL="${ADMIN_USER}@${DOMAIN}"
 
-# Intentar crear el usuario admin
 BESZEL_ADMIN_RESPONSE=$(curl -sf -X POST \
     "http://127.0.0.1:${PORT_BESZEL}/api/admins" \
     -H "Content-Type: application/json" \
@@ -145,43 +124,6 @@ else
     log_warning "En tu primera visita a ${URL_BESZEL} deberás:"
     log_warning "  1. Crear una cuenta con email: ${ADMIN_EMAIL}"
     log_warning "  2. Usar tu contraseña admin"
-fi
-
-# ── Crear servicio systemd para Agent ─────────────────────
-if [[ -f "${BESZEL_AGENT_BIN}" ]]; then
-    log_step "Creando servicio systemd para Beszel Agent"
-    log_info "El Agent monitorea este servidor y envía métricas al Hub."
-    log_info "Puedes agregar este servidor al Hub desde la interfaz web."
-
-    cat > "${SYSTEMD_DIR}/beszel-agent.service" << EOF
-[Unit]
-Description=Beszel Agent - Monitor de sistema
-After=network.target
-
-[Service]
-User=${ADMIN_USER}
-Group=${ADMIN_USER}
-# El Agent necesita una KEY del Hub para conectarse.
-# Agrégala aquí después de configurar el servidor en la UI de Beszel:
-# Environment=KEY=<tu_key_aquí>
-# Environment=PORT=45876
-# ExecStart=${BESZEL_AGENT_BIN}
-ExecStart=/bin/true
-Restart=no
-StandardOutput=journal
-StandardError=journal
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-    log_info ""
-    log_info "Para activar el Agent después de la instalación:"
-    log_info "  1. Abre ${URL_BESZEL} y agrega este servidor"
-    log_info "  2. Copia la KEY que genera Beszel"
-    log_info "  3. Edita /etc/systemd/system/beszel-agent.service"
-    log_info "  4. Descomenta las líneas Environment= y ExecStart="
-    log_info "  5. Ejecuta: systemctl daemon-reload && systemctl enable --now beszel-agent"
 fi
 
 # ── Configurar nginx vhost ─────────────────────────────────

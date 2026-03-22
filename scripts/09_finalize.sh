@@ -32,12 +32,31 @@ chown -R "${ADMIN_USER}:${ADMIN_USER}" "${ADMIN_HOME}"
 mkdir -p "${LOG_DIR}"
 log_success "Permisos configurados ✓"
 
-# ── Habilitar fail2ban ─────────────────────────────────────
+# ── Configurar y habilitar fail2ban ───────────────────────
 log_step "Configurando fail2ban"
 
+# En Debian 12 con systemd, sshd no escribe en /var/log/auth.log
+# sino en journald. Hay que configurar fail2ban para leerlo desde ahí.
+cat > /etc/fail2ban/jail.d/sshd.local << 'EOF'
+[sshd]
+enabled  = true
+backend  = systemd
+maxretry = 5
+bantime  = 1h
+findtime = 10m
+EOF
+
+log_success "Configuración de fail2ban para sshd (journald) creada ✓"
+
 systemctl enable fail2ban
-systemctl start fail2ban
-log_success "fail2ban activo ✓"
+systemctl restart fail2ban
+sleep 2
+
+if systemctl is-active --quiet fail2ban; then
+    log_success "fail2ban activo ✓"
+else
+    log_warning "fail2ban no pudo iniciarse. Revisa: journalctl -u fail2ban -n 20"
+fi
 
 # ── Verificar todos los servicios ─────────────────────────
 log_step "Verificando servicios instalados"

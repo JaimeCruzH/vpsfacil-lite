@@ -214,7 +214,7 @@ echo -e "${COLOR_BOLD_GREEN}║  ${COLOR_WHITE}URL:${COLOR_RESET}          ${COL
 echo -e "${COLOR_BOLD_GREEN}║  ${COLOR_WHITE}Usuario UI:${COLOR_RESET}   ${COLOR_CYAN}${ADMIN_USER}${COLOR_RESET}"
 echo -e "${COLOR_BOLD_GREEN}║  ${COLOR_WHITE}Contraseña UI:${COLOR_RESET}${COLOR_CYAN}${ADMIN_PASSWORD}${COLOR_RESET}"
 echo -e "${COLOR_BOLD_GREEN}║  ${COLOR_WHITE}Pass cifrado:${COLOR_RESET} ${COLOR_CYAN}${ADMIN_PASSWORD}${COLOR_RESET}  ${COLOR_YELLOW}← necesaria para recuperar backups${COLOR_RESET}"
-echo -e "${COLOR_BOLD_GREEN}║  ${COLOR_WHITE}Repositorio:${COLOR_RESET}  ${COLOR_CYAN}${APPS_DIR}/backups  (filesystem local)${COLOR_RESET}"
+echo -e "${COLOR_BOLD_GREEN}║  ${COLOR_WHITE}Repositorio:${COLOR_RESET}  ${COLOR_CYAN}${BACKUP_DIR}  (filesystem local)${COLOR_RESET}"
 echo -e "${COLOR_BOLD_GREEN}║                                                              ║${COLOR_RESET}"
 echo -e "${COLOR_BOLD_GREEN}╠══════════════════════════════════════════════════════════════╣${COLOR_RESET}"
 echo -e "${COLOR_BOLD_GREEN}║                                                              ║${COLOR_RESET}"

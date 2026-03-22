@@ -120,14 +120,14 @@ VPSfacil-lite/
 ```
 /home/ADMIN_USER/
 ├── setup.conf                 # Configuración guardada
-└── apps/
+├── backups/                   # Repositorio Kopia (NO respaldar esto)
+└── apps/                      # Datos de apps (esto SÍ se respalda con Kopia)
     ├── certs/                 # Certificado wildcard Let's Encrypt
     │   ├── origin-cert.pem
     │   └── origin-cert-key.pem
     ├── filebrowser/           # Base de datos SQLite de File Browser
     ├── kopia/                 # Configuración y cache de Kopia
-    ├── beszel/                # Datos de Beszel Hub
-    └── backups/               # Destino local de backups Kopia
+    └── beszel/                # Datos de Beszel Hub
 ```
 
 ---

@@ -51,7 +51,25 @@ STEPS=(
     "09_finalize.sh"
 )
 
-if [[ -f "/root/setup.conf" ]]; then
+# Buscar config en todas las ubicaciones posibles (compatibilidad con versiones anteriores)
+_EXISTING_CONFIG=""
+for _candidate in "/root/setup.conf" "/tmp/vpsfacil_setup.conf"; do
+    if [[ -f "$_candidate" ]]; then
+        _EXISTING_CONFIG="$_candidate"
+        break
+    fi
+done
+# También buscar en cualquier home de usuario
+if [[ -z "$_EXISTING_CONFIG" ]]; then
+    for _home in /home/*/; do
+        if [[ -f "${_home}setup.conf" ]]; then
+            _EXISTING_CONFIG="${_home}setup.conf"
+            break
+        fi
+    done
+fi
+
+if [[ -n "$_EXISTING_CONFIG" ]]; then
     # ── Modo RESUME ─────────────────────────────────────────
     # setup.conf existe → el usuario ya ingresó sus datos en una sesión
     # anterior. Cargamos la configuración y mostramos el estado.
@@ -59,8 +77,11 @@ if [[ -f "/root/setup.conf" ]]; then
     echo -e "${COLOR_BOLD_YELLOW}║         ↩  Retomando instalación anterior                    ║${COLOR_RESET}"
     echo -e "${COLOR_BOLD_YELLOW}╚══════════════════════════════════════════════════════════════╝${COLOR_RESET}"
     echo ""
-    log_info "Configuración guardada encontrada. No es necesario ingresar los datos de nuevo."
+    log_info "Configuración guardada encontrada en: ${_EXISTING_CONFIG}"
+    log_info "No es necesario ingresar los datos de nuevo."
     source_config
+    # Asegurar que también quede en /root/setup.conf para próximas ejecuciones
+    [[ "$_EXISTING_CONFIG" != "/root/setup.conf" ]] && cp "$_EXISTING_CONFIG" /root/setup.conf && chmod 600 /root/setup.conf || true
     echo ""
     log_info "Configuración cargada:"
     echo -e "   ${COLOR_BOLD_WHITE}Dominio:${COLOR_RESET}       ${COLOR_CYAN}${DOMAIN}${COLOR_RESET}"

@@ -64,15 +64,18 @@ echo ""
 
 # ── Clonar o actualizar repositorio ─────────────────────────
 INSTALL_DIR="/opt/vpsfacil-lite"
+REPO_URL="https://github.com/JaimeCruzH/vpsfacil-lite"
 
 if [[ -d "${INSTALL_DIR}/.git" ]]; then
-    echo -e "${CYAN}[→]${RESET} Actualizando repositorio existente en ${INSTALL_DIR}..."
-    git -C "${INSTALL_DIR}" pull --ff-only --quiet
-    echo -e "${GREEN}[✓]${RESET} Repositorio actualizado"
+    echo -e "${CYAN}[→]${RESET} Actualizando repositorio en ${INSTALL_DIR}..."
+    # Forzar actualización: fetch + reset al estado exacto del repo remoto
+    git -C "${INSTALL_DIR}" fetch origin main 2>&1
+    git -C "${INSTALL_DIR}" reset --hard origin/main 2>&1
+    echo -e "${GREEN}[✓]${RESET} Repositorio actualizado al último commit"
 else
     echo -e "${CYAN}[→]${RESET} Clonando repositorio en ${INSTALL_DIR}..."
     rm -rf "${INSTALL_DIR}"
-    git clone --quiet https://github.com/JaimeCruzH/vpsfacil-lite "${INSTALL_DIR}"
+    git clone "${REPO_URL}" "${INSTALL_DIR}"
     echo -e "${GREEN}[✓]${RESET} Repositorio clonado"
 fi
 

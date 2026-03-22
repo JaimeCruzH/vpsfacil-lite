@@ -94,26 +94,21 @@ log_success "IP Tailscale: ${TAILSCALE_IP}"
 # ── Guardar IP en setup.conf ───────────────────────────────
 log_step "Guardando configuración"
 
-# Buscar el archivo de configuración guardado
-CONF_FILE=""
-for candidate in "${ADMIN_HOME}/setup.conf" "/tmp/vpsfacil_setup.conf" "/root/setup.conf"; do
-    if [[ -f "$candidate" ]]; then
-        CONF_FILE="$candidate"
-        break
+# Siempre actualizar /root/setup.conf (archivo autoritativo que carga source_config)
+# y también cualquier otro setup.conf que exista (home del admin, tmp)
+_update_tailscale_ip_in_file() {
+    local file="$1"
+    [[ -f "$file" ]] || return 0
+    if grep -q "^TAILSCALE_IP=" "$file"; then
+        sed -i "s|^TAILSCALE_IP=.*|TAILSCALE_IP=\"${TAILSCALE_IP}\"|" "$file"
+    else
+        echo "TAILSCALE_IP=\"${TAILSCALE_IP}\"" >> "$file"
     fi
-done
+}
 
-if [[ -z "$CONF_FILE" ]]; then
-    log_error "No se encontró setup.conf para guardar la IP."
-    exit 1
-fi
-
-# Agregar o actualizar TAILSCALE_IP en el archivo de configuración
-if grep -q "^TAILSCALE_IP=" "$CONF_FILE"; then
-    sed -i "s|^TAILSCALE_IP=.*|TAILSCALE_IP=\"${TAILSCALE_IP}\"|" "$CONF_FILE"
-else
-    echo "TAILSCALE_IP=\"${TAILSCALE_IP}\"" >> "$CONF_FILE"
-fi
+_update_tailscale_ip_in_file "/root/setup.conf"
+_update_tailscale_ip_in_file "${ADMIN_HOME}/setup.conf"
+_update_tailscale_ip_in_file "/tmp/vpsfacil_setup.conf"
 
 log_success "IP guardada en configuración ✓"
 export TAILSCALE_IP

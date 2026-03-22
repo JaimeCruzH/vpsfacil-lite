@@ -99,8 +99,7 @@ ExecStart=/usr/bin/kopia server start \\
     --config-file=${KOPIA_CONFIG} \\
     --cache-directory=${KOPIA_CACHE} \\
     --log-dir=${KOPIA_LOG} \\
-    --insecure \\
-    --no-grpc
+    --insecure
 Restart=on-failure
 RestartSec=5
 StandardOutput=journal

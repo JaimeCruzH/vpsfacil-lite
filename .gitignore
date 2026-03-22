@@ -1,0 +1,26 @@
+# Secretos y configuración local
+*.env
+.env.*
+setup.conf
+*.pem
+*.key
+*.crt
+*.p12
+
+# Backups y datos
+backups/
+*.bak
+*.bak.*
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
+*~

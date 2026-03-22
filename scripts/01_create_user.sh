@@ -59,7 +59,7 @@ if [[ -f "$PRIVATE_KEY" ]]; then
     log_info "Ya existe una clave SSH. Omitiendo generación."
 else
     mkdir -p "$SSH_DIR"
-    ssh-keygen -t ed25519 -f "$PRIVATE_KEY" -N "" -C "vpsfacil-admin@${DOMAIN}"
+    ssh-keygen -q -t ed25519 -f "$PRIVATE_KEY" -N "" -C "vpsfacil-admin@${DOMAIN}"
     log_success "Par de claves SSH generado ✓"
 fi
 

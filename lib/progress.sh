@@ -2,10 +2,10 @@
 # ============================================================
 # lib/progress.sh — Tracking de progreso visual
 # VPSfacil-lite - Instalación Nativa sin Docker
-# 9 pasos de instalación core
+# 10 pasos de instalación core
 # ============================================================
 
-readonly TOTAL_STEPS=9
+readonly TOTAL_STEPS=10
 
 CURRENT_STEP=0
 

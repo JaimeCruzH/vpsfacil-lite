@@ -1,0 +1,4 @@
+# Forzar LF en scripts bash (crítico para ejecutar en Linux)
+*.sh text eol=lf
+*.conf text eol=lf
+*.md text eol=lf

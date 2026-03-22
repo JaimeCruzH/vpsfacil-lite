@@ -8,7 +8,7 @@
 #   o descarga y ejecuta: bash setup.sh
 #
 # Requisitos:
-#   - Debian 12 limpio
+#   - Linux con apt (recomendado: Debian 12)
 #   - Acceso root
 #   - Dominio con DNS en Cloudflare
 # ============================================================
@@ -32,7 +32,7 @@ echo ""
 echo -e "${COLOR_BOLD_BLUE}╔══════════════════════════════════════════════════════════════╗${COLOR_RESET}"
 echo -e "${COLOR_BOLD_BLUE}║${COLOR_RESET}                                                              ${COLOR_BOLD_BLUE}║${COLOR_RESET}"
 echo -e "${COLOR_BOLD_BLUE}║${COLOR_RESET}  ${COLOR_BOLD_GREEN}VPSfacil-lite${COLOR_RESET} — Instalación Nativa sin Docker            ${COLOR_BOLD_BLUE}║${COLOR_RESET}"
-echo -e "${COLOR_BOLD_BLUE}║${COLOR_RESET}  ${COLOR_WHITE}Debian 12 · Systemd · Nginx · Tailscale VPN            ${COLOR_RESET}  ${COLOR_BOLD_BLUE}║${COLOR_RESET}"
+echo -e "${COLOR_BOLD_BLUE}║${COLOR_RESET}  ${COLOR_WHITE}Systemd · Nginx · Let's Encrypt · Tailscale VPN        ${COLOR_RESET}  ${COLOR_BOLD_BLUE}║${COLOR_RESET}"
 echo -e "${COLOR_BOLD_BLUE}║${COLOR_RESET}                                                              ${COLOR_BOLD_BLUE}║${COLOR_RESET}"
 echo -e "${COLOR_BOLD_BLUE}╚══════════════════════════════════════════════════════════════╝${COLOR_RESET}"
 echo ""
@@ -50,7 +50,8 @@ STEPS=(
     "05_setup_certificates.sh"
     "06_install_filebrowser.sh"
     "07_install_kopia.sh"
-    "08_finalize.sh"
+    "08_install_beszel.sh"
+    "09_finalize.sh"
 )
 
 for script in "${STEPS[@]}"; do

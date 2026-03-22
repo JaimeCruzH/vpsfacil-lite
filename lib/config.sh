@@ -58,15 +58,14 @@ source_config() {
 ask_initial_config() {
     print_header "Configuración Inicial"
 
-    log_info "Antes de instalar necesitamos dos datos básicos:"
-    log_info "  1. Tu nombre de dominio (ej: miempresa.com)"
-    log_info "  2. El nombre del usuario administrador a crear en el servidor"
+    log_info "Responde estas preguntas una sola vez. El resto de la instalación"
+    log_info "fluye de forma automática (solo habrá una pausa en Tailscale)."
     echo ""
     print_separator
     echo ""
 
     # --- Dominio ---
-    echo -e "${COLOR_BOLD_WHITE}PREGUNTA 1 de 3 — Dominio${COLOR_RESET}"
+    echo -e "${COLOR_BOLD_WHITE}PREGUNTA 1 de 5 — Dominio${COLOR_RESET}"
     echo ""
     log_info "Escribe el nombre de tu dominio principal."
     log_info "Ejemplos: agentexperto.work  |  miempresa.com  |  startup.io"
@@ -86,9 +85,10 @@ ask_initial_config() {
     echo ""
 
     # --- Usuario admin ---
-    echo -e "${COLOR_BOLD_WHITE}PREGUNTA 2 de 3 — Usuario administrador${COLOR_RESET}"
+    echo -e "${COLOR_BOLD_WHITE}PREGUNTA 2 de 5 — Usuario administrador${COLOR_RESET}"
     echo ""
     log_info "Este usuario reemplazará a 'root' como administrador del servidor."
+    log_info "También será tu usuario de acceso en File Browser, Kopia y Beszel."
     log_info "Usa solo letras minúsculas, números y guión bajo (sin espacios)."
     echo ""
     while true; do
@@ -105,24 +105,99 @@ ask_initial_config() {
     print_separator
     echo ""
 
+    # --- Contraseña admin ---
+    echo -e "${COLOR_BOLD_WHITE}PREGUNTA 3 de 5 — Contraseña de administrador${COLOR_RESET}"
+    echo ""
+    log_info "Esta contraseña se usará para:"
+    log_info "  · El usuario Linux '${ADMIN_USER}' en el servidor"
+    log_info "  · Login en File Browser, Kopia y Beszel"
+    log_info "Requisitos: mínimo 12 caracteres, incluir mayúsculas, minúsculas y números."
+    echo ""
+    while true; do
+        ADMIN_PASSWORD=$(prompt_password "Contraseña para '${ADMIN_USER}'")
+        if [[ ${#ADMIN_PASSWORD} -lt 12 ]]; then
+            log_error "Mínimo 12 caracteres. Intenta de nuevo."
+            continue
+        fi
+        if ! echo "$ADMIN_PASSWORD" | grep -q '[A-Z]'; then
+            log_error "Debe incluir al menos una letra mayúscula."
+            continue
+        fi
+        if ! echo "$ADMIN_PASSWORD" | grep -q '[a-z]'; then
+            log_error "Debe incluir al menos una letra minúscula."
+            continue
+        fi
+        if ! echo "$ADMIN_PASSWORD" | grep -q '[0-9]'; then
+            log_error "Debe incluir al menos un número."
+            continue
+        fi
+        local pass_confirm
+        pass_confirm=$(prompt_password "Confirma la contraseña")
+        if [[ "$ADMIN_PASSWORD" != "$pass_confirm" ]]; then
+            log_error "Las contraseñas no coinciden. Intenta de nuevo."
+            continue
+        fi
+        log_success "Contraseña válida."
+        break
+    done
+
+    echo ""
+    print_separator
+    echo ""
+
     # --- Zona horaria ---
-    echo -e "${COLOR_BOLD_WHITE}PREGUNTA 3 de 3 — Zona horaria${COLOR_RESET}"
+    echo -e "${COLOR_BOLD_WHITE}PREGUNTA 4 de 5 — Zona horaria${COLOR_RESET}"
     echo ""
     log_info "Ejemplos: America/Santiago  |  America/Bogota  |  Europe/Madrid  |  UTC"
     echo ""
     TIMEZONE=$(prompt_input "¿Cuál es tu zona horaria?" "America/Santiago")
     echo ""
 
+    print_separator
+    echo ""
+
+    # --- Cloudflare API Token ---
+    echo -e "${COLOR_BOLD_WHITE}PREGUNTA 5 de 5 — Cloudflare API Token${COLOR_RESET}"
+    echo ""
+    log_info "Se usa para crear los registros DNS y para obtener el certificado SSL."
+    log_info "Cómo obtenerlo:"
+    log_info "  1. Ve a dash.cloudflare.com → My Profile → API Tokens"
+    log_info "  2. Crea un token con permiso: Zone → DNS → Edit"
+    log_info "  3. Copia y pega el token aquí"
+    echo ""
+    while true; do
+        CF_API_TOKEN=$(prompt_input "Cloudflare API Token")
+        if [[ -z "$CF_API_TOKEN" ]]; then
+            log_error "El token no puede estar vacío."
+            continue
+        fi
+        log_process "Verificando token con Cloudflare..."
+        local cf_response
+        cf_response=$(curl -sf -H "Authorization: Bearer ${CF_API_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/user/tokens/verify" 2>/dev/null || echo '{"success":false}')
+        if echo "$cf_response" | grep -q '"success":true'; then
+            log_success "Token de Cloudflare válido."
+            break
+        else
+            log_error "Token inválido o sin permisos suficientes."
+            log_info "Verifica que tenga el permiso Zone:DNS:Edit y vuelve a intentarlo."
+        fi
+    done
+
+    echo ""
+
     # Confirmar configuración
     print_separator
     log_info "Resumen de configuración:"
     echo ""
-    echo -e "   ${COLOR_BOLD_WHITE}Dominio:${COLOR_RESET}       ${COLOR_CYAN}${DOMAIN}${COLOR_RESET}"
-    echo -e "   ${COLOR_BOLD_WHITE}Usuario admin:${COLOR_RESET} ${COLOR_CYAN}${ADMIN_USER}${COLOR_RESET}"
-    echo -e "   ${COLOR_BOLD_WHITE}Zona horaria:${COLOR_RESET}  ${COLOR_CYAN}${TIMEZONE}${COLOR_RESET}"
+    echo -e "   ${COLOR_BOLD_WHITE}Dominio:${COLOR_RESET}          ${COLOR_CYAN}${DOMAIN}${COLOR_RESET}"
+    echo -e "   ${COLOR_BOLD_WHITE}Usuario admin:${COLOR_RESET}    ${COLOR_CYAN}${ADMIN_USER}${COLOR_RESET}"
+    echo -e "   ${COLOR_BOLD_WHITE}Contraseña:${COLOR_RESET}       ${COLOR_CYAN}(configurada)${COLOR_RESET}"
+    echo -e "   ${COLOR_BOLD_WHITE}Zona horaria:${COLOR_RESET}     ${COLOR_CYAN}${TIMEZONE}${COLOR_RESET}"
+    echo -e "   ${COLOR_BOLD_WHITE}CF API Token:${COLOR_RESET}     ${COLOR_CYAN}(verificado ✓)${COLOR_RESET}"
     echo -e "   ${COLOR_BOLD_WHITE}Home del usuario:${COLOR_RESET} ${COLOR_CYAN}/home/${ADMIN_USER}${COLOR_RESET}"
-    echo -e "   ${COLOR_BOLD_WHITE}Apps en:${COLOR_RESET}       ${COLOR_CYAN}/home/${ADMIN_USER}/apps${COLOR_RESET}"
-    echo -e "   ${COLOR_BOLD_WHITE}URL VPN base:${COLOR_RESET}  ${COLOR_CYAN}*.vpn.${DOMAIN}${COLOR_RESET}"
+    echo -e "   ${COLOR_BOLD_WHITE}Apps en:${COLOR_RESET}          ${COLOR_CYAN}/home/${ADMIN_USER}/apps${COLOR_RESET}"
+    echo -e "   ${COLOR_BOLD_WHITE}URLs VPN:${COLOR_RESET}         ${COLOR_CYAN}*.vpn.${DOMAIN}${COLOR_RESET}"
     echo ""
     print_separator
 
@@ -156,9 +231,10 @@ _derive_config_vars() {
     export URL_KOPIA="https://kopia.vpn.${DOMAIN}"
     export URL_BESZEL="https://beszel.vpn.${DOMAIN}"
 
-    # Configuración de certificados
-    export CERT_FILE="${CERTS_DIR}/origin-cert.pem"
-    export CERT_KEY="${CERTS_DIR}/origin-cert-key.pem"
+    # Configuración de certificados (Let's Encrypt via certbot)
+    export CERT_FILE="/etc/letsencrypt/live/vpn.${DOMAIN}/fullchain.pem"
+    export CERT_KEY="/etc/letsencrypt/live/vpn.${DOMAIN}/privkey.pem"
+    export CERT_DOMAIN="vpn.${DOMAIN}"
 }
 
 # ============================================================
@@ -181,7 +257,9 @@ save_config() {
 
 DOMAIN="${DOMAIN}"
 ADMIN_USER="${ADMIN_USER}"
+ADMIN_PASSWORD="${ADMIN_PASSWORD}"
 TIMEZONE="${TIMEZONE:-America/Santiago}"
+CF_API_TOKEN="${CF_API_TOKEN}"
 INSTALLATION_DATE="$(date '+%Y-%m-%d')"
 EOF
 

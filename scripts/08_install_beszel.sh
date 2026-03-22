@@ -47,8 +47,7 @@ BESZEL_API_RESPONSE=$(curl -sf "https://api.github.com/repos/henrygd/beszel/rele
 
 HUB_URL=$(echo "${BESZEL_API_RESPONSE}" \
     | jq -r --arg arch "${ARCH}" \
-        '.assets[] | select((.name | ascii_downcase | contains("hub")) and (.name | contains($arch))) | .browser_download_url' \
-    | head -1)
+        '.assets[] | select(.name == ("beszel_linux_" + $arch + ".tar.gz")) | .browser_download_url')
 
 if [[ -z "$HUB_URL" ]]; then
     log_error "No se encontró el binario de Beszel Hub para ${ARCH}."
@@ -61,9 +60,9 @@ fi
 
 log_process "Descargando Hub: ${HUB_URL}"
 TMPDIR_BZ=$(mktemp -d)
-curl -fsSL "${HUB_URL}" -o "${TMPDIR_BZ}/beszel_hub.tar.gz"
-tar -xzf "${TMPDIR_BZ}/beszel_hub.tar.gz" -C "${TMPDIR_BZ}"
-install -m 755 "${TMPDIR_BZ}/beszel_hub" "${BESZEL_HUB_BIN}"
+curl -fsSL "${HUB_URL}" -o "${TMPDIR_BZ}/beszel.tar.gz"
+tar -xzf "${TMPDIR_BZ}/beszel.tar.gz" -C "${TMPDIR_BZ}"
+install -m 755 "${TMPDIR_BZ}/beszel" "${BESZEL_HUB_BIN}"
 rm -rf "${TMPDIR_BZ}"
 log_success "Beszel Hub instalado en ${BESZEL_HUB_BIN} ✓"
 

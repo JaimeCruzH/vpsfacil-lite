@@ -43,14 +43,19 @@ if [[ -f "${BESZEL_HUB_BIN}" ]]; then
     log_info "Beszel Hub ya está instalado. Actualizando..."
 fi
 
-HUB_URL=$(curl -sf "https://api.github.com/repos/henrygd/beszel/releases/latest" \
+BESZEL_API_RESPONSE=$(curl -sf "https://api.github.com/repos/henrygd/beszel/releases/latest")
+
+HUB_URL=$(echo "${BESZEL_API_RESPONSE}" \
     | jq -r --arg arch "${ARCH}" \
-        '.assets[] | select((.name | contains("beszel_hub_linux_" + $arch)) and (.name | endswith(".tar.gz"))) | .browser_download_url' \
+        '.assets[] | select((.name | ascii_downcase | contains("hub")) and (.name | contains($arch))) | .browser_download_url' \
     | head -1)
 
 if [[ -z "$HUB_URL" ]]; then
     log_error "No se encontró el binario de Beszel Hub para ${ARCH}."
-    log_info "Verifica en: https://github.com/henrygd/beszel/releases"
+    log_info "Assets disponibles en este release:"
+    echo "${BESZEL_API_RESPONSE}" | jq -r '.assets[].name' | while read -r name; do
+        log_info "  - ${name}"
+    done
     exit 1
 fi
 

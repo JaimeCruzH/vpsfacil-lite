@@ -93,7 +93,7 @@ WorkingDirectory=${APP_DIR}
 Environment=HOME=${ADMIN_HOME}
 Environment=KOPIA_PASSWORD=${ADMIN_PASSWORD}
 ExecStart=/usr/bin/kopia server start \\
-    --address=127.0.0.1:${PORT_KOPIA} \\
+    --address=0.0.0.0:${PORT_KOPIA} \\
     --server-username=${ADMIN_USER} \\
     --server-password=${ADMIN_PASSWORD} \\
     --config-file=${KOPIA_CONFIG} \\

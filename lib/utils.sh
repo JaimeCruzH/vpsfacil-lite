@@ -279,17 +279,17 @@ wait_for_port() {
 
     log_process "Esperando que el puerto ${port} esté disponible (máx. ${timeout}s)..."
 
-    while ! nc -z "$host" "$port" 2>/dev/null; do
+    while ! timeout 1 bash -c "echo > /dev/tcp/${host}/${port}" 2>/dev/null; do
         elapsed=$((elapsed + 2))
         if [[ $elapsed -ge $timeout ]]; then
             log_error "El puerto ${port} no respondió en ${timeout} segundos"
             return 1
         fi
-        printf "."
+        printf "." >&2
         sleep 2
     done
 
-    echo ""
+    echo "" >&2
     log_success "Puerto ${port} disponible"
     return 0
 }

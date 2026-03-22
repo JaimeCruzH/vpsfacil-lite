@@ -111,6 +111,14 @@ EOF
 systemctl daemon-reload
 systemctl enable filebrowser
 systemctl restart filebrowser
+
+# Verificar que el servicio arrancó correctamente
+sleep 2
+if ! systemctl is-active --quiet filebrowser; then
+    log_error "El servicio filebrowser no pudo iniciarse."
+    log_info "Revisa los logs con: journalctl -u filebrowser -n 30"
+    exit 1
+fi
 log_success "Servicio filebrowser activado ✓"
 
 # Esperar a que el servicio esté listo

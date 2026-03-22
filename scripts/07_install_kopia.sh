@@ -83,6 +83,13 @@ EOF
 systemctl daemon-reload
 systemctl enable kopia
 systemctl restart kopia
+
+sleep 2
+if ! systemctl is-active --quiet kopia; then
+    log_error "El servicio kopia no pudo iniciarse."
+    log_info "Revisa los logs con: journalctl -u kopia -n 30"
+    exit 1
+fi
 log_success "Servicio kopia activado ✓"
 
 # Esperar a que el servicio esté listo

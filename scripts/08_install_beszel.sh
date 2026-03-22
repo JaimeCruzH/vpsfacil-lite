@@ -93,6 +93,13 @@ EOF
 systemctl daemon-reload
 systemctl enable beszel
 systemctl restart beszel
+
+sleep 2
+if ! systemctl is-active --quiet beszel; then
+    log_error "El servicio beszel no pudo iniciarse."
+    log_info "Revisa los logs con: journalctl -u beszel -n 30"
+    exit 1
+fi
 log_success "Servicio beszel activado ✓"
 
 # Esperar a que el Hub esté listo

@@ -52,7 +52,7 @@ KOPIA_LOG="${LOG_DIR}/kopia"
 BACKUP_REPO="${APPS_DIR}/backups"
 
 mkdir -p "${APP_DIR}" "${KOPIA_CACHE}" "${KOPIA_LOG}" "${BACKUP_REPO}"
-chown -R "${ADMIN_USER}:${ADMIN_USER}" "${APP_DIR}" "${BACKUP_REPO}"
+chown -R "${ADMIN_USER}:${ADMIN_USER}" "${APP_DIR}" "${KOPIA_CACHE}" "${KOPIA_LOG}" "${BACKUP_REPO}"
 
 # ── Inicializar repositorio local (requerido por Kopia 0.22+) ─────
 log_step "Inicializando repositorio local de Kopia"

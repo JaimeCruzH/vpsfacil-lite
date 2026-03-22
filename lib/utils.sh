@@ -12,15 +12,15 @@
 # ============================================================
 
 log_info() {
-    echo -e "${PREFIX_INFO} $1"
+    echo -e "${PREFIX_INFO} $1" >&2
 }
 
 log_success() {
-    echo -e "${PREFIX_SUCCESS} $1"
+    echo -e "${PREFIX_SUCCESS} $1" >&2
 }
 
 log_warning() {
-    echo -e "${PREFIX_WARNING} $1"
+    echo -e "${PREFIX_WARNING} $1" >&2
 }
 
 log_error() {
@@ -28,17 +28,17 @@ log_error() {
 }
 
 log_prompt() {
-    echo -e "${PREFIX_PROMPT} $1"
+    echo -e "${PREFIX_PROMPT} $1" >&2
 }
 
 log_process() {
-    echo -e "${PREFIX_PROCESS} $1"
+    echo -e "${PREFIX_PROCESS} $1" >&2
 }
 
 log_step() {
-    echo ""
-    echo -e "${PREFIX_STEP} ${COLOR_BOLD_WHITE}$1${COLOR_RESET}"
-    echo -e "${COLOR_BLUE}$(printf '─%.0s' $(seq 1 55))${COLOR_RESET}"
+    echo "" >&2
+    echo -e "${PREFIX_STEP} ${COLOR_BOLD_WHITE}$1${COLOR_RESET}" >&2
+    echo -e "${COLOR_BLUE}$(printf '─%.0s' $(seq 1 55))${COLOR_RESET}" >&2
 }
 
 # ============================================================

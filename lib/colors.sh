@@ -35,7 +35,7 @@ readonly PREFIX_STEP="${COLOR_BOLD_WHITE}[→]${COLOR_RESET}"
 
 # --- Función: Separador simple ---
 print_separator() {
-    echo -e "${COLOR_BLUE}────────────────────────────────────────────────────────────${COLOR_RESET}"
+    echo -e "${COLOR_BLUE}────────────────────────────────────────────────────────────${COLOR_RESET}" >&2
 }
 
 # --- Función: Cabecera de sección ---
@@ -50,11 +50,11 @@ print_header() {
     local right_pad
     right_pad=$(printf '%*s' "$((width - title_len - padding))" '')
 
-    echo ""
-    echo -e "${COLOR_BOLD_BLUE}╔$(printf '═%.0s' $(seq 1 $width))╗${COLOR_RESET}"
-    echo -e "${COLOR_BOLD_BLUE}║${COLOR_RESET}${COLOR_BOLD_WHITE}${left_pad}${title}${right_pad}${COLOR_RESET}${COLOR_BOLD_BLUE}║${COLOR_RESET}"
-    echo -e "${COLOR_BOLD_BLUE}╚$(printf '═%.0s' $(seq 1 $width))╝${COLOR_RESET}"
-    echo ""
+    echo "" >&2
+    echo -e "${COLOR_BOLD_BLUE}╔$(printf '═%.0s' $(seq 1 $width))╗${COLOR_RESET}" >&2
+    echo -e "${COLOR_BOLD_BLUE}║${COLOR_RESET}${COLOR_BOLD_WHITE}${left_pad}${title}${right_pad}${COLOR_RESET}${COLOR_BOLD_BLUE}║${COLOR_RESET}" >&2
+    echo -e "${COLOR_BOLD_BLUE}╚$(printf '═%.0s' $(seq 1 $width))╝${COLOR_RESET}" >&2
+    echo "" >&2
 }
 
 # --- Función: Banner principal del proyecto ---

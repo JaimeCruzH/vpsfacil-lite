@@ -14,9 +14,9 @@ show_progress() {
     local description="$2"
     CURRENT_STEP=$step
 
-    echo ""
-    echo -e "${COLOR_BOLD_BLUE}┌─ Progreso ─────────────────────────────────────────────────┐${COLOR_RESET}"
-    echo -e "${COLOR_BOLD_BLUE}│${COLOR_RESET}  Paso ${COLOR_BOLD_WHITE}${step}${COLOR_RESET} de ${COLOR_BOLD_WHITE}${TOTAL_STEPS}${COLOR_RESET}: ${COLOR_CYAN}${description}${COLOR_RESET}"
+    echo "" >&2
+    echo -e "${COLOR_BOLD_BLUE}┌─ Progreso ─────────────────────────────────────────────────┐${COLOR_RESET}" >&2
+    echo -e "${COLOR_BOLD_BLUE}│${COLOR_RESET}  Paso ${COLOR_BOLD_WHITE}${step}${COLOR_RESET} de ${COLOR_BOLD_WHITE}${TOTAL_STEPS}${COLOR_RESET}: ${COLOR_CYAN}${description}${COLOR_RESET}" >&2
 
     # Barra de progreso
     local filled=$(( (step * 50) / TOTAL_STEPS ))
@@ -26,7 +26,7 @@ show_progress() {
     for ((i=0; i<empty; i++));  do bar+="░"; done
     local pct=$(( (step * 100) / TOTAL_STEPS ))
 
-    echo -e "${COLOR_BOLD_BLUE}│${COLOR_RESET}  ${COLOR_BOLD_GREEN}${bar}${COLOR_RESET} ${pct}%"
-    echo -e "${COLOR_BOLD_BLUE}└────────────────────────────────────────────────────────────┘${COLOR_RESET}"
-    echo ""
+    echo -e "${COLOR_BOLD_BLUE}│${COLOR_RESET}  ${COLOR_BOLD_GREEN}${bar}${COLOR_RESET} ${pct}%" >&2
+    echo -e "${COLOR_BOLD_BLUE}└────────────────────────────────────────────────────────────┘${COLOR_RESET}" >&2
+    echo "" >&2
 }

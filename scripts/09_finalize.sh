@@ -58,6 +58,54 @@ if [[ "$ALL_OK" == "false" ]]; then
     log_warning "Algunos servicios no están activos. Revisa con: systemctl status <servicio>"
 fi
 
+# ── Mostrar clave privada SSH ──────────────────────────────
+log_step "Tu clave privada SSH"
+
+# Obtener IP Tailscale
+TS_IP="${TAILSCALE_IP:-$(tailscale ip -4 2>/dev/null || echo '<IP_TAILSCALE>')}"
+
+PRIVATE_KEY="${ADMIN_HOME}/.ssh/id_ed25519"
+
+echo ""
+echo -e "${COLOR_BOLD_RED}╔══════════════════════════════════════════════════════════════╗${COLOR_RESET}"
+echo -e "${COLOR_BOLD_RED}║          ⚠  COPIA ESTA CLAVE PRIVADA AHORA  ⚠               ║${COLOR_RESET}"
+echo -e "${COLOR_BOLD_RED}╚══════════════════════════════════════════════════════════════╝${COLOR_RESET}"
+echo ""
+echo -e "${COLOR_YELLOW}Nota: la clave ed25519 es más corta que las claves RSA tradicionales,${COLOR_RESET}"
+echo -e "${COLOR_YELLOW}pero es igual o más segura. Es el estándar moderno recomendado.${COLOR_RESET}"
+echo ""
+echo -e "${COLOR_BOLD_WHITE}── CLAVE PRIVADA (selecciona todo el bloque y cópialo) ──────────${COLOR_RESET}"
+cat "${PRIVATE_KEY}"
+echo -e "${COLOR_BOLD_WHITE}────────────────────────────────────────────────────────────────${COLOR_RESET}"
+echo ""
+
+echo -e "${COLOR_BOLD_WHITE}Cómo guardar y usar la clave en Windows 11 con Bitvise SSH:${COLOR_RESET}"
+echo ""
+echo -e "${COLOR_CYAN}  PASO A — Guardar el archivo${COLOR_RESET}"
+echo -e "  ${COLOR_WHITE}1. Copia todo el texto de arriba (desde -----BEGIN hasta -----END-----)${COLOR_RESET}"
+echo -e "  ${COLOR_WHITE}2. Abre el Bloc de notas en Windows${COLOR_RESET}"
+echo -e "  ${COLOR_WHITE}3. Pega el texto y guarda el archivo como: vpsfacil_key.pem${COLOR_RESET}"
+echo -e "  ${COLOR_WHITE}   (Asegúrate de que no tenga extensión .txt, solo .pem)${COLOR_RESET}"
+echo ""
+echo -e "${COLOR_CYAN}  PASO B — Importar en Bitvise SSH Client${COLOR_RESET}"
+echo -e "  ${COLOR_WHITE}1. Abre Bitvise SSH Client${COLOR_RESET}"
+echo -e "  ${COLOR_WHITE}2. En la pestaña 'Login', configura:${COLOR_RESET}"
+echo -e "  ${COLOR_WHITE}   · Host:              ${TS_IP}${COLOR_RESET}"
+echo -e "  ${COLOR_WHITE}   · Port:              22${COLOR_RESET}"
+echo -e "  ${COLOR_WHITE}   · Username:          ${ADMIN_USER}${COLOR_RESET}"
+echo -e "  ${COLOR_WHITE}   · Initial method:    publickey${COLOR_RESET}"
+echo -e "  ${COLOR_WHITE}3. Haz clic en 'Client key manager' (botón junto a 'Initial method')${COLOR_RESET}"
+echo -e "  ${COLOR_WHITE}4. Clic en 'Import' → selecciona el archivo vpsfacil_key.pem${COLOR_RESET}"
+echo -e "  ${COLOR_WHITE}5. Cierra el key manager${COLOR_RESET}"
+echo -e "  ${COLOR_WHITE}6. En 'Client key', selecciona la clave recién importada${COLOR_RESET}"
+echo -e "  ${COLOR_WHITE}7. Haz clic en 'Log in'${COLOR_RESET}"
+echo ""
+echo -e "${COLOR_CYAN}  PASO C — Conexión alternativa por terminal (PowerShell / WSL)${COLOR_RESET}"
+echo -e "  ${COLOR_WHITE}  ssh -i C:\\ruta\\vpsfacil_key.pem ${ADMIN_USER}@${TS_IP}${COLOR_RESET}"
+echo ""
+
+wait_for_user "Presiona Enter cuando hayas copiado y guardado la clave privada..."
+
 # ── PAUSA CRÍTICA: verificar SSH antes de hardening ───────
 echo ""
 echo -e "${COLOR_BOLD_RED}╔══════════════════════════════════════════════════════════════╗${COLOR_RESET}"
@@ -69,29 +117,17 @@ echo -e "${COLOR_BOLD_RED}║  contraseña. Solo podrás conectarte con tu clave
 echo -e "${COLOR_BOLD_RED}║                                                              ║${COLOR_RESET}"
 echo -e "${COLOR_BOLD_RED}╚══════════════════════════════════════════════════════════════╝${COLOR_RESET}"
 echo ""
-
-# Obtener IP Tailscale para mostrar el comando de conexión
-TS_IP="${TAILSCALE_IP:-$(tailscale ip -4 2>/dev/null || echo '<IP_TAILSCALE>')}"
-
-echo -e "${COLOR_BOLD_WHITE}Abre una NUEVA terminal y verifica que puedes conectarte:${COLOR_RESET}"
+echo -e "${COLOR_BOLD_WHITE}Abre Bitvise (o una nueva terminal) y verifica que puedes conectarte${COLOR_RESET}"
+echo -e "${COLOR_BOLD_WHITE}al servidor ANTES de responder 'sí' aquí.${COLOR_RESET}"
 echo ""
-echo -e "  ${COLOR_CYAN}ssh -i /ruta/a/vpsfacil_key.pem ${ADMIN_USER}@${TS_IP}${COLOR_RESET}"
-echo ""
-echo -e "${COLOR_YELLOW}Tu clave privada SSH se guardó en: ${ADMIN_HOME}/.ssh/id_ed25519${COLOR_RESET}"
-echo -e "${COLOR_YELLOW}Debes haberla copiado en el Paso 2 de la instalación.${COLOR_RESET}"
-echo ""
-echo -e "${COLOR_BOLD_RED}Si NO puedes conectarte, escribe 'no' y NO continúes.${COLOR_RESET}"
-echo -e "${COLOR_BOLD_RED}De lo contrario perderás el acceso al servidor.${COLOR_RESET}"
+echo -e "${COLOR_BOLD_RED}Si NO puedes conectarte, responde 'no' — NO pierdas el acceso.${COLOR_RESET}"
 echo ""
 
 if ! confirm "¿Pudiste conectarte al servidor con tu clave SSH?"; then
     echo ""
-    log_error "Hardening SSH cancelado por el usuario."
-    log_info "Para depurar la conexión SSH, ejecuta en tu computadora:"
-    log_info "  ssh -v -i /ruta/a/tu_clave.pem ${ADMIN_USER}@${TS_IP}"
-    log_info ""
-    log_info "Cuando soluciones el problema, ejecuta manualmente:"
-    log_info "  bash ${SCRIPT_DIR}/09_finalize.sh"
+    log_error "Hardening SSH cancelado."
+    log_info "Revisa la conexión usando los pasos de Bitvise descritos arriba."
+    log_info "Cuando lo soluciones, ejecuta: bash /opt/vpsfacil-lite/scripts/09_finalize.sh"
     exit 0
 fi
 

@@ -29,9 +29,6 @@ if [[ ! -f "${KOPIA_KEYRING}" ]]; then
     log_success "Clave GPG de Kopia agregada ✓"
 fi
 
-# Detectar distribución y codename
-DISTRO_CODENAME=$(lsb_release -cs 2>/dev/null || echo "bookworm")
-
 cat > /etc/apt/sources.list.d/kopia.list << EOF
 deb [signed-by=${KOPIA_KEYRING}] https://packages.kopia.io/apt/ stable main
 EOF
@@ -78,6 +75,19 @@ fi
 
 chown -R "${ADMIN_USER}:${ADMIN_USER}" "${APP_DIR}" "${BACKUP_REPO}"
 
+# ── Crear archivo de credenciales (fuera del unit systemd) ─
+log_step "Creando archivo de credenciales de Kopia"
+
+KOPIA_ENV_FILE="/etc/kopia/kopia.env"
+mkdir -p /etc/kopia
+cat > "${KOPIA_ENV_FILE}" << EOF
+KOPIA_PASSWORD=${ADMIN_PASSWORD}
+KOPIA_SERVER_PASSWORD=${ADMIN_PASSWORD}
+EOF
+chmod 600 "${KOPIA_ENV_FILE}"
+chown root:root "${KOPIA_ENV_FILE}"
+log_success "Credenciales guardadas en ${KOPIA_ENV_FILE} (chmod 600) ✓"
+
 # ── Crear servicio systemd ─────────────────────────────────
 log_step "Creando servicio systemd para Kopia Server"
 
@@ -91,11 +101,11 @@ User=${ADMIN_USER}
 Group=${ADMIN_USER}
 WorkingDirectory=${APP_DIR}
 Environment=HOME=${ADMIN_HOME}
-Environment=KOPIA_PASSWORD=${ADMIN_PASSWORD}
+EnvironmentFile=${KOPIA_ENV_FILE}
 ExecStart=/usr/bin/kopia server start \\
     --address=0.0.0.0:${PORT_KOPIA} \\
     --server-username=${ADMIN_USER} \\
-    --server-password=${ADMIN_PASSWORD} \\
+    --server-password=\$KOPIA_SERVER_PASSWORD \\
     --config-file=${KOPIA_CONFIG} \\
     --cache-directory=${KOPIA_CACHE} \\
     --log-dir=${KOPIA_LOG} \\

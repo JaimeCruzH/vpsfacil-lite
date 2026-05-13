@@ -55,7 +55,7 @@ VPS — nginx nativo (HTTPS, cert Let's Encrypt wildcard)
 
 ---
 
-## Orden de Instalación (9 pasos, como root)
+## Orden de Instalación (10 pasos, como root)
 
 | Paso | Script | Descripción |
 |------|--------|-------------|
@@ -67,7 +67,8 @@ VPS — nginx nativo (HTTPS, cert Let's Encrypt wildcard)
 | 6 | `05_setup_certificates.sh` | Cert Let's Encrypt wildcard + configurar nginx |
 | 7 | `06_install_filebrowser.sh` | File Browser: binario + systemd + nginx vhost |
 | 8 | `07_install_kopia.sh` | Kopia Backup: paquete + systemd + nginx vhost |
-| 9 | `08_finalize.sh` | Permisos, hardening SSH, fail2ban, resumen |
+| 9 | `08_install_beszel.sh` | Beszel Hub: binario + systemd + nginx vhost |
+| 10 | `09_finalize.sh` | Permisos, hardening SSH, fail2ban, resumen |
 
 ---
 
@@ -91,7 +92,7 @@ VPSfacil-lite/
 ├── setup.sh                   # Script principal
 ├── .gitignore
 │
-├── scripts/                   # 9 pasos de instalación
+├── scripts/                   # 10 pasos de instalación
 │   ├── 00_precheck.sh
 │   ├── 01_create_user.sh
 │   ├── 02_install_firewall.sh
@@ -100,14 +101,15 @@ VPSfacil-lite/
 │   ├── 05_setup_certificates.sh
 │   ├── 06_install_filebrowser.sh
 │   ├── 07_install_kopia.sh
-│   └── 08_finalize.sh
+│   ├── 08_install_beszel.sh
+│   └── 09_finalize.sh
 │
 ├── lib/                       # Funciones reutilizables
-│   ├── colors.sh              # Colores ANSI (copiado de VPSfacil)
-│   ├── utils.sh               # Utilidades bash (copiado de VPSfacil)
-│   ├── config.sh              # Variables globales (adaptado, sin Docker)
-│   ├── progress.sh            # Barra de progreso (9 pasos)
-│   └── cloudflare_api.sh      # API de Cloudflare DNS (copiado de VPSfacil)
+│   ├── colors.sh              # Colores ANSI
+│   ├── utils.sh               # Utilidades bash
+│   ├── config.sh              # Variables globales (sin Docker)
+│   ├── progress.sh            # Barra de progreso (10 pasos)
+│   └── cloudflare_api.sh      # API de Cloudflare DNS
 │
 └── config/
     └── defaults.conf          # Valores por defecto
@@ -182,9 +184,9 @@ No comparte:
 
 - [x] Estructura de proyecto creada
 - [x] Librerías base copiadas y adaptadas
-- [x] Scripts esqueleto de los 9 pasos
+- [x] Scripts de los 10 pasos implementados
 - [x] CLAUDE.md documentado
-- [ ] Implementación de scripts (en desarrollo)
+- [x] Bugs y código muerto corregidos (review mayo 2026)
 - [ ] Pruebas en VPS fresco
 
 **Repositorio:** https://github.com/JaimeCruzH/vpsfacil-lite

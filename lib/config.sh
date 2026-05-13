@@ -220,7 +220,6 @@ _derive_config_vars() {
     export APPS_DIR="${ADMIN_HOME}/apps"
     export CERTS_DIR="${APPS_DIR}/certs"
     export BACKUP_DIR="${ADMIN_HOME}/backups"
-    export LOG_DIR="/var/log/vpsfacil"
 
     # Subdominios VPN
     export VPN_SUBDOMAIN="vpn.${DOMAIN}"

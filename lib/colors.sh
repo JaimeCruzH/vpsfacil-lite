@@ -56,22 +56,3 @@ print_header() {
     echo -e "${COLOR_BOLD_BLUE}╚$(printf '═%.0s' $(seq 1 $width))╝${COLOR_RESET}" >&2
     echo "" >&2
 }
-
-# --- Función: Banner principal del proyecto ---
-print_banner() {
-    echo ""
-    echo -e "${COLOR_BOLD_BLUE}╔══════════════════════════════════════════════════════════════╗${COLOR_RESET}"
-    echo -e "${COLOR_BOLD_BLUE}║${COLOR_RESET}                                                              ${COLOR_BOLD_BLUE}║${COLOR_RESET}"
-    echo -e "${COLOR_BOLD_BLUE}║${COLOR_RESET}  ${COLOR_BOLD_GREEN}██╗   ██╗██████╗ ███████╗███████╗ █████╗  ██████╗██╗██╗     ${COLOR_RESET}  ${COLOR_BOLD_BLUE}║${COLOR_RESET}"
-    echo -e "${COLOR_BOLD_BLUE}║${COLOR_RESET}  ${COLOR_BOLD_GREEN}██║   ██║██╔══██╗██╔════╝██╔════╝██╔══██╗██╔════╝██║██║     ${COLOR_RESET}  ${COLOR_BOLD_BLUE}║${COLOR_RESET}"
-    echo -e "${COLOR_BOLD_BLUE}║${COLOR_RESET}  ${COLOR_BOLD_GREEN}██║   ██║██████╔╝███████╗█████╗  ███████║██║     ██║██║     ${COLOR_RESET}  ${COLOR_BOLD_BLUE}║${COLOR_RESET}"
-    echo -e "${COLOR_BOLD_BLUE}║${COLOR_RESET}  ${COLOR_BOLD_GREEN}╚██╗ ██╔╝██╔═══╝ ╚════██║██╔══╝  ██╔══██║██║     ██║██║     ${COLOR_RESET}  ${COLOR_BOLD_BLUE}║${COLOR_RESET}"
-    echo -e "${COLOR_BOLD_BLUE}║${COLOR_RESET}  ${COLOR_BOLD_GREEN} ╚████╔╝ ██║     ███████║██║     ██║  ██║╚██████╗██║███████╗${COLOR_RESET}  ${COLOR_BOLD_BLUE}║${COLOR_RESET}"
-    echo -e "${COLOR_BOLD_BLUE}║${COLOR_RESET}  ${COLOR_BOLD_GREEN}  ╚═══╝  ╚═╝     ╚══════╝╚═╝     ╚═╝  ╚═╝╚═════╝╚═╝╚══════╝${COLOR_RESET}  ${COLOR_BOLD_BLUE}║${COLOR_RESET}"
-    echo -e "${COLOR_BOLD_BLUE}║${COLOR_RESET}                                                              ${COLOR_BOLD_BLUE}║${COLOR_RESET}"
-    echo -e "${COLOR_BOLD_BLUE}║${COLOR_RESET}  ${COLOR_BOLD_CYAN}        Instalación Automatizada de VPS v1.0            ${COLOR_RESET}  ${COLOR_BOLD_BLUE}║${COLOR_RESET}"
-    echo -e "${COLOR_BOLD_BLUE}║${COLOR_RESET}  ${COLOR_WHITE}        Debian 12 · Docker · Tailscale VPN              ${COLOR_RESET}  ${COLOR_BOLD_BLUE}║${COLOR_RESET}"
-    echo -e "${COLOR_BOLD_BLUE}║${COLOR_RESET}                                                              ${COLOR_BOLD_BLUE}║${COLOR_RESET}"
-    echo -e "${COLOR_BOLD_BLUE}╚══════════════════════════════════════════════════════════════╝${COLOR_RESET}"
-    echo ""
-}

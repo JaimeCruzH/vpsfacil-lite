@@ -156,7 +156,8 @@ log_step "Aplicando hardening SSH"
 SSHD_CONFIG="/etc/ssh/sshd_config"
 
 # Hacer backup del config original
-cp "${SSHD_CONFIG}" "${SSHD_CONFIG}.bak.$(date +%Y%m%d%H%M%S)"
+SSHD_BACKUP="${SSHD_CONFIG}.bak.$(date +%Y%m%d%H%M%S)"
+cp "${SSHD_CONFIG}" "${SSHD_BACKUP}"
 
 # Deshabilitar login como root
 sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin no/' "${SSHD_CONFIG}"
@@ -179,7 +180,7 @@ if sshd -t 2>/dev/null; then
     log_success "  - Autenticación por clave SSH: HABILITADA"
 else
     log_error "Error en la configuración SSH. Restaurando backup..."
-    cp "${SSHD_CONFIG}.bak."* "${SSHD_CONFIG}" 2>/dev/null || true
+    cp "${SSHD_BACKUP}" "${SSHD_CONFIG}" 2>/dev/null || true
     log_info "Configuración SSH restaurada. Revisa manualmente ${SSHD_CONFIG}."
     exit 1
 fi
